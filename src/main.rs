@@ -3,39 +3,21 @@
     windows_subsystem = "windows"
 )]
 
+mod sidebar;
+mod types;
+
 use freya::prelude::*;
-
-#[derive(PartialEq, PartialOrd, Ord, Eq, Clone, Copy, Debug)]
-struct Cookies(pub i32);
-
-#[derive(PartialEq, PartialOrd, Ord, Eq, Clone, Copy, Debug)]
-struct ClickPower(pub i32);
-
-#[component]
-fn UpgradeButton(amount: i32) -> Element {
-    let mut click_power = use_context::<Signal<ClickPower>>();
-    let mut cookies = use_context::<Signal<Cookies>>();
-    rsx!(
-        Button {
-            onclick: move |_| {
-                if cookies.read().0 >= amount * 100 {
-                    cookies.write().0 -= amount * 100;
-                    click_power.write().0 += amount;
-                }
-            },
-            label {
-                "Increase Click Power +{amount} ({amount * 100} cookies)"
-            }
-        }
-    )
-}
+use sidebar::Sidebar;
+use types::{ClickPower, Crabs, Upgrades};
 
 fn app() -> Element {
-    let mut click_power = use_signal(|| ClickPower(1));
-    let mut cookies = use_signal(|| Cookies(0));
+    let click_power = use_signal(|| ClickPower(1));
+    let mut upgrades = use_signal(|| Upgrades::init());
+    let mut crabs = use_signal(|| Crabs(100000));
 
     use_context_provider(|| click_power);
-    use_context_provider(|| cookies);
+    use_context_provider(|| upgrades);
+    use_context_provider(|| crabs);
 
     rsx!(
         rect {
@@ -43,28 +25,113 @@ fn app() -> Element {
             width: "100%",
             background: "black",
             color: "white",
-            main_align: "center",
-            cross_align: "center",
-            label {
-                font_size: "75",
-                font_weight: "bold",
-                onclick: move |_| {
-                    let cur_cookies = cookies.read().0;
-                    *cookies.write() = Cookies(cur_cookies + click_power.read().0);
-                },
-                "{cookies.read().0}"
-            }
-            UpgradeButton {
-                amount: 1,
-            }
-            UpgradeButton {
-                amount: 10,
-            }
-            UpgradeButton {
-                amount: 100,
-            }
-            UpgradeButton {
-                amount: 1000,
+            direction: "horizontal",
+            Sidebar {}
+            rect {
+                height: "100%",
+                width: "fill",
+                label {
+                    font_size: "40",
+                    font_weight: "bold",
+                    text_align: "center",
+                    "Store"
+                }
+                rect {
+                    width: "100%",
+                    padding: "10",
+                    direction: "horizontal",
+                    cross_align: "center",
+                    background: "gray",
+                    border: "2 solid white",
+                    border_align: "inner",
+                    onclick: move |_| {
+                        if crabs.read().0 >= 100 {
+                            crabs.write().0 -= 100;
+                            upgrades.write().claws += 1;
+                        }
+                    },
+                    rect {
+                        label {
+                            font_size: "20",
+                            font_weight: "bold",
+                            "Claws"
+                        }
+                        label {
+                            font_size: "20",
+                            "{100} crabs"
+                        }
+                    }
+                    label {
+                        font_size: "20",
+                        font_weight: "bold",
+                        text_align: "right",
+                        "{upgrades.read().claws}"
+                    }
+                }
+                rect {
+                    width: "100%",
+                    padding: "10",
+                    direction: "horizontal",
+                    cross_align: "center",
+                    background: "gray",
+                    border: "2 solid white",
+                    border_align: "inner",
+                    onclick: move |_| {
+                        if crabs.read().0 >= 1000 {
+                            crabs.write().0 -= 1000;
+                            upgrades.write().nets += 1;
+                        }
+                    },
+                    rect {
+                        label {
+                            font_size: "20",
+                            font_weight: "bold",
+                            "Nets"
+                        }
+                        label {
+                            font_size: "20",
+                            "{1000} crabs"
+                        }
+                    }
+                    label {
+                        font_size: "20",
+                        font_weight: "bold",
+                        text_align: "right",
+                        "{upgrades.read().nets}"
+                    }
+                }
+                rect {
+                    width: "100%",
+                    padding: "10",
+                    direction: "horizontal",
+                    cross_align: "center",
+                    background: "gray",
+                    border: "2 solid white",
+                    border_align: "inner",
+                    onclick: move |_| {
+                        if crabs.read().0 >= 10000 {
+                            crabs.write().0 -= 10000;
+                            upgrades.write().buckets += 1;
+                        }
+                    },
+                    rect {
+                        label {
+                            font_size: "20",
+                            font_weight: "bold",
+                            "Buckets"
+                        }
+                        label {
+                            font_size: "20",
+                            "{10000} buckets"
+                        }
+                    }
+                    label {
+                        font_size: "20",
+                        font_weight: "bold",
+                        text_align: "right",
+                        "{upgrades.read().buckets}"
+                    }
+                }
             }
         }
     )

@@ -1607,6 +1607,7 @@ version = "0.1.0"
 dependencies = [
  "dioxus",
  "freya",
+ "tokio",
 ]
 
 [[package]]
